@@ -9,3 +9,5 @@
 - Moverse desde la terminal a la carpeta contenedora del archivo main.go.
 - Compilar y ejecutar el proyecto con el comando "go run main.go"
 - Abrir en el navegador http://localhost:8080
+
+- correr:  docker exec -i some-postgres psql -U postgres -d base_turnero < ./db/schema/schema.sql

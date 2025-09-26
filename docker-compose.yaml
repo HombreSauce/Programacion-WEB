@@ -1,0 +1,16 @@
+services:
+  db:
+    image: postgres:17.6
+    container_name: some-postgres
+    restart: always
+    environment: #Habría que pasar las variables de ambiente en otro archivo?
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: base_turnero
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+volumes:
+  db_data:
