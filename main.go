@@ -8,70 +8,37 @@ import (
 	"os"
 	"time"
 
-	db "tp_especial.com/servidor-go/db/sqlc"
 	sqlc "tp_especial.com/servidor-go/db/sqlc"
 
 	_ "github.com/lib/pq"
 )
 
-func mustEnv(key string) string {
-	v := os.Getenv(key)
-	if v == "" {
-		log.Fatalf("Falta %s (ej.: postgres://user:pass@host:port/db?sslmode=disable)", key)
-	}
-	return v
-}
-
-func ensureSchema(ctx context.Context, sqlDB *sql.DB) {
-	const ddl = `
-CREATE TABLE IF NOT EXISTS turnos (
-  id_turno   SERIAL PRIMARY KEY,
-  id_medico  INTEGER NOT NULL,
-  id_paciente INTEGER NOT NULL,
-  estado     TEXT NOT NULL DEFAULT 'programado',
-  fecha      DATE NOT NULL,
-  hora       TIME NOT NULL
-);
-`
-	if _, err := sqlDB.ExecContext(ctx, ddl); err != nil {
-		log.Fatalf("Error creando schema: %v", err)
-	}
-}
-
-
 func ProbarTurnos() {
-    fmt.Println("Prueba de turnos iniciada...")
+	fmt.Println("Prueba de turnos iniciada...")
+	//BASE DE DATOS
 
-		ctx := context.Background()
-	dsn := mustEnv("DATABASE_URL")
-
-	sqlDB, err := sql.Open("postgres", dsn)
+	connStr := "host=localhost port=5432 user=postgres password=postgres dbname=base_turnero sslmode=disable"
+	db, err := sql.Open("postgres", connStr)
 	if err != nil {
-		log.Fatalf("open DB: %v", err)
+		log.Fatalf("failed to connect to DB: %v", err)
 	}
-	defer sqlDB.Close()
-
-	if err := sqlDB.PingContext(ctx); err != nil {
-		log.Fatalf("ping DB: %v", err)
-	}
-
-	ensureSchema(ctx, sqlDB)
-
-	q := db.New(sqlDB)
+	defer db.Close()
+	q := sqlc.New(db)
+	ctx := context.Background()
 
 	// === 1) Crear un turno futuro programado ===
 	maniana := time.Now().Add(24 * time.Hour)
 	fecha := time.Date(maniana.Year(), maniana.Month(), maniana.Day(), 0, 0, 0, 0, time.Local)
 	hora := time.Date(1, 1, 1, 10, 30, 0, 0, time.Local) // 10:30
 
-	t1, err := q.CrearTurno(ctx, db.CrearTurnoParams{
+	t1, err := q.CrearTurno(ctx, sqlc.CrearTurnoParams{
 		IDMedico:   101,
 		IDPaciente: 201,
 		Fecha:      fecha,
 		Hora:       hora,
 	})
 	if err != nil {
-		log.Fatalf("CrearTurno: %v", err)
+		log.Fatalf("ESTIOY ACA CrearTurno: %v", err)
 	}
 	fmt.Printf("CrearTurno -> ID=%d Estado=%s\n", t1.IDTurno, t1.Estado)
 
@@ -90,7 +57,7 @@ func ProbarTurnos() {
 
 	// === 3) ActualizarTurnoDatos (cambio médico y hora) ===
 	nuevaHora := time.Date(1, 1, 1, 11, 0, 0, 0, time.Local) // 11:00
-	if err := q.ActualizarTurnoDatos(ctx, db.ActualizarTurnoDatosParams{
+	if err := q.ActualizarTurnoDatos(ctx, sqlc.ActualizarTurnoDatosParams{
 		IDTurno:    t1.IDTurno,
 		IDMedico:   102,
 		IDPaciente: 201,
@@ -108,7 +75,7 @@ func ProbarTurnos() {
 	}
 
 	// === 4) CambiarEstadoTurno a "reprogramado" ===
-	if err := q.CambiarEstadoTurno(ctx, db.CambiarEstadoTurnoParams{
+	if err := q.CambiarEstadoTurno(ctx, sqlc.CambiarEstadoTurnoParams{
 		IDTurno: t1.IDTurno,
 		Estado:  "reprogramado",
 	}); err != nil {
@@ -122,7 +89,7 @@ func ProbarTurnos() {
 
 	// === 5) AtenderTurno requiere estado 'programado' ===
 	// Lo vuelvo a programado y luego lo atiendo
-	if err := q.CambiarEstadoTurno(ctx, db.CambiarEstadoTurnoParams{
+	if err := q.CambiarEstadoTurno(ctx, sqlc.CambiarEstadoTurnoParams{
 		IDTurno: t1.IDTurno,
 		Estado:  "programado",
 	}); err != nil {
@@ -150,7 +117,7 @@ func ProbarTurnos() {
 	}
 
 	// === 7) Crear otro turno programado para probar listados ===
-	t2, err := q.CrearTurno(ctx, db.CrearTurnoParams{
+	t2, err := q.CrearTurno(ctx, sqlc.CrearTurnoParams{
 		IDMedico:   102,
 		IDPaciente: 201,
 		Fecha:      fecha,
