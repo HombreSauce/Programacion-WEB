@@ -30,13 +30,13 @@ CREATE TABLE pacientes (
 
 -- Table: turnos
 CREATE TABLE turnos (
-    id_turno int  NOT NULL,
+    id_turno SERIAL  NOT NULL,
     id_medico int  NOT NULL,
     id_paciente int  NOT NULL,
     estado varchar(10)  NOT NULL,
     fecha date  NOT NULL,
     hora time  NOT NULL,
-    CONSTRAINT turno_PK PRIMARY KEY (ID_turno)
+    CONSTRAINT turno_PK PRIMARY KEY (id_turno)
 );
 
 -- Table: usuarios
@@ -45,7 +45,7 @@ CREATE TABLE usuarios (
     DNI varchar(9)  NOT NULL,
     nombre varchar(30)  NOT NULL,
     apellido varchar(30)  NOT NULL,
-    sexo varchar(10) NOT NULL,
+    sexo varchar(10) NOT NULL, 
     fecha_nacimiento date  NOT NULL,
     email varchar(50)  NOT NULL,
     telefono varchar(20)  NOT NULL,
@@ -97,6 +97,34 @@ ALTER TABLE turnos ADD CONSTRAINT turnos_pacientes
     FOREIGN KEY (id_paciente)
     REFERENCES pacientes (id_paciente)  
 ;
+
+-- Restrcciones y reglas adicionales para turnos
+
+-- Estado con CHECK (proyecto chico, flexible)
+ALTER TABLE turnos
+  ALTER COLUMN estado SET NOT NULL,
+  ADD CONSTRAINT turnos_estado_chk
+  CHECK (estado IN ('programado','atendido','cancelado'));
+
+-- Default al crear turno
+ALTER TABLE turnos
+  ALTER COLUMN estado SET DEFAULT 'programado';
+
+-- Evitar solapado por médico (solo turnos activos)
+CREATE UNIQUE INDEX IF NOT EXISTS ux_turnos_medico_fecha_hora_activos
+  ON turnos (id_medico, fecha, hora)
+  WHERE estado IN ('programado');
+
+-- No permitir turnos en el pasado
+ ALTER TABLE turnos
+   ADD CONSTRAINT turnos_no_pasados
+   CHECK ( (fecha > CURRENT_DATE) OR (fecha = CURRENT_DATE AND hora > CURRENT_TIME) );
+
+-- No permitir que un medico sea su propio paciente
+ALTER TABLE turnos
+  ADD CONSTRAINT turnos_medico_distinto_de_paciente
+  CHECK (id_medico <> id_paciente);
+
 
 -- End of file.
 
