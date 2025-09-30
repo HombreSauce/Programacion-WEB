@@ -1,6 +1,6 @@
 services:
   db:
-    image: postgres:17.6
+    image: docker.io/library/postgres:17.6
     container_name: some-postgres
     restart: always
     environment: #Habría que pasar las variables de ambiente en otro archivo?
