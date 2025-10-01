@@ -18,6 +18,6 @@ UPDATE medicos
 SET nro_matricula = $2, especialidad = $3
 WHERE id_medico = $1;
 
--- name: EliminarMedico :exec
+-- name: EliminarMedico :execrows
 DELETE FROM medicos
 WHERE id_medico = $1;

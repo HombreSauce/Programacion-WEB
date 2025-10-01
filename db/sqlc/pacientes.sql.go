@@ -52,14 +52,17 @@ func (q *Queries) CrearPaciente(ctx context.Context, arg CrearPacienteParams) (C
 	return i, err
 }
 
-const eliminarPaciente = `-- name: EliminarPaciente :exec
+const eliminarPaciente = `-- name: EliminarPaciente :execrows
 DELETE FROM pacientes
 WHERE id_paciente = $1
 `
 
-func (q *Queries) EliminarPaciente(ctx context.Context, idPaciente int32) error {
-	_, err := q.db.ExecContext(ctx, eliminarPaciente, idPaciente)
-	return err
+func (q *Queries) EliminarPaciente(ctx context.Context, idPaciente int32) (int64, error) {
+	result, err := q.db.ExecContext(ctx, eliminarPaciente, idPaciente)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected()
 }
 
 const listarPacientes = `-- name: ListarPacientes :many

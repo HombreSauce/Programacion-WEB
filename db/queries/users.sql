@@ -18,6 +18,6 @@ UPDATE usuarios
 SET DNI = $2, nombre = $3, apellido = $4, email = $5, telefono = $6, fecha_nacimiento = $7, sexo = $8, rol = $9
 WHERE id = $1;
 
--- name: EliminarUsuario :exec
+-- name: EliminarUsuario :execrows 
 DELETE FROM usuarios
 WHERE id = $1;

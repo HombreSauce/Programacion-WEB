@@ -98,14 +98,17 @@ func (q *Queries) CrearUsuario(ctx context.Context, arg CrearUsuarioParams) (Cre
 	return i, err
 }
 
-const eliminarUsuario = `-- name: EliminarUsuario :exec
+const eliminarUsuario = `-- name: EliminarUsuario :execrows
 DELETE FROM usuarios
 WHERE id = $1
 `
 
-func (q *Queries) EliminarUsuario(ctx context.Context, id int32) error {
-	_, err := q.db.ExecContext(ctx, eliminarUsuario, id)
-	return err
+func (q *Queries) EliminarUsuario(ctx context.Context, id int32) (int64, error) {
+	result, err := q.db.ExecContext(ctx, eliminarUsuario, id)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected()
 }
 
 const listarUsuarios = `-- name: ListarUsuarios :many

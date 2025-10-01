@@ -45,7 +45,7 @@ func (q *Queries) CrearRelacionMedicoObra(ctx context.Context, arg CrearRelacion
 	return i, err
 }
 
-const eliminarRelacionMedicoObra = `-- name: EliminarRelacionMedicoObra :exec
+const eliminarRelacionMedicoObra = `-- name: EliminarRelacionMedicoObra :execrows
 DELETE FROM atiende_por
 WHERE id_medico = $1
   AND obra_social_nombre = $2
@@ -56,9 +56,12 @@ type EliminarRelacionMedicoObraParams struct {
 	ObraSocialNombre string `json:"obra_social_nombre"`
 }
 
-func (q *Queries) EliminarRelacionMedicoObra(ctx context.Context, arg EliminarRelacionMedicoObraParams) error {
-	_, err := q.db.ExecContext(ctx, eliminarRelacionMedicoObra, arg.IDMedico, arg.ObraSocialNombre)
-	return err
+func (q *Queries) EliminarRelacionMedicoObra(ctx context.Context, arg EliminarRelacionMedicoObraParams) (int64, error) {
+	result, err := q.db.ExecContext(ctx, eliminarRelacionMedicoObra, arg.IDMedico, arg.ObraSocialNombre)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected()
 }
 
 const listarMedicosPorObra = `-- name: ListarMedicosPorObra :many

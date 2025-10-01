@@ -23,7 +23,7 @@ SET obra_social_nombre = $2
 WHERE id_medico = $1
   AND obra_social_nombre = $3;
 
--- name: EliminarRelacionMedicoObra :exec
+-- name: EliminarRelacionMedicoObra :execrows
 DELETE FROM atiende_por
 WHERE id_medico = $1
   AND obra_social_nombre = $2;

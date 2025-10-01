@@ -57,13 +57,15 @@ CREATE TABLE usuarios (
 -- Reference: atiende_por_medicos (table: atiende_por)
 ALTER TABLE atiende_por ADD CONSTRAINT atiende_por_medicos_FK
     FOREIGN KEY (id_medico)
-    REFERENCES medicos (id_medico)  
+    REFERENCES medicos (id_medico)
+    ON DELETE CASCADE
 ;
 
 -- Reference: atiende_por_obra_social (table: atiende_por)
 ALTER TABLE atiende_por ADD CONSTRAINT atiende_por_obra_social_FK
     FOREIGN KEY (obra_social_nombre)
     REFERENCES obra_social (nombre)  
+    ON DELETE CASCADE
 ;
 
 -- Reference: medicos_usuarios (table: medicos)
@@ -125,6 +127,18 @@ ALTER TABLE turnos
   ADD CONSTRAINT turnos_medico_distinto_de_paciente
   CHECK (id_medico <> id_paciente);
 
-
--- End of file.
+-- Inserta si no existe (seguro para ejecutar varias veces)
+INSERT INTO obra_social (nombre)
+VALUES
+  ('PAMI - INSSJP'),
+  ('IOMA'),
+  ('OSDE'),
+  ('OSECAC - Empleados de Comercio'),
+  ('OSPRERA - Trabajadores Rurales'),
+  ('OSPe - Petroleros'),
+  ('OSUOMRA - Metalúrgicos'),
+  ('OSPJN - Judiciales Nación'),
+  ('OSMATA - Madereros'),
+  ('OSDEPYM - Dirigentes de Empresas')
+ON CONFLICT (nombre) DO NOTHING;
 

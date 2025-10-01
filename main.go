@@ -32,50 +32,15 @@ func main() {
 	queries := sqlc.New(db)
 	ctx := context.Background()
 
-	//CREAMOS UN USUARIO
+	//CREAMOS OTRO USUARIO
 	usuarioCreado, err := queries.CrearUsuario(ctx,
 		sqlc.CrearUsuarioParams{
 			Dni:             "12345678",
-			Nombre:          "Juan",
-			Apellido:        "Caballo",
+			Nombre:          "Roman",
+			Apellido:        "Gonzalez",
 			Sexo:            "Masculino",
-			FechaNacimiento: time.Date(2000, 5, 20, 0, 0, 0, 0, time.UTC),
-			Email:           "juan.caballo@ejemplo.com",
-			Telefono:        "2494505050",
-			Rol:             "P",
-		})
-
-	if err != nil {
-		log.Fatalf("No se pudo crear el usuario: %v", err)
-	}
-	fmt.Printf("Usuario creado: %+v\n", usuarioCreado)
-
-	//OBTENEMOS SU INFORMACIÓN
-	usuario, err := queries.ObtenerUsuario(ctx, usuarioCreado.ID)
-	if err != nil {
-		log.Fatalf("No se pudo obtener el usuario: %v", err)
-	}
-	fmt.Printf("Usuario obtenido: %+v\n", usuario)
-
-	//LO GUARDAMOS COMO PACIENTE
-	pacienteCreado, err := queries.CrearPaciente(ctx,
-		sqlc.CrearPacienteParams{
-			IDPaciente: usuarioCreado.ID,
-		})
-	if err != nil {
-		log.Fatalf("No se pudo crear el paciente: %v", err)
-	}
-	fmt.Printf("Paciente creado: %+v\n", pacienteCreado)
-
-	//CREAMOS OTRO USUARIO
-	usuarioCreado, err = queries.CrearUsuario(ctx,
-		sqlc.CrearUsuarioParams{
-			Dni:             "12345678",
-			Nombre:          "Juana",
-			Apellido:        "Maria",
-			Sexo:            "Femenino",
 			FechaNacimiento: time.Date(1997, 6, 30, 0, 0, 0, 0, time.UTC),
-			Email:           "juanita.maria@ejemplo.com",
+			Email:           "romanGonzalez@ejemplo.com",
 			Telefono:        "2494505045",
 			Rol:             "M",
 		})
@@ -97,78 +62,70 @@ func main() {
 	}
 	fmt.Printf("Medico creado: %+v\n", medicoCreado)
 
-	//OBTENEMOS EL MEDICO
-	medico, err := queries.ObtenerMedico(ctx, usuarioCreado.ID)
+	//CREAMOS UNA RELACION MEDICO OBRA
+	relacionCreada, err := queries.CrearRelacionMedicoObra(ctx, sqlc.CrearRelacionMedicoObraParams{
+		IDMedico:         usuarioCreado.ID,
+		ObraSocialNombre: "IOMA",
+	})
 	if err != nil {
-		log.Fatalf("No se pudo obtener el médico: %v", err)
+		log.Fatalf("No se pudo crear la relación medico obra social: %v", err)
 	}
-	fmt.Printf("Médico obtenido: %+v\n", medico)
+	fmt.Printf("Relacion creada: %+v\n", relacionCreada)
 
-	//Actualicemos la información del primer usuario
-	err = queries.ActualizarUsuario(ctx,
-		sqlc.ActualizarUsuarioParams{
-			ID:              1,
-			Dni:             "12345678",
-			Nombre:          "Juan",
-			Apellido:        "Caballo",
-			Sexo:            "Masculino",
-			FechaNacimiento: time.Date(2000, 5, 20, 0, 0, 0, 0, time.UTC),
-			Email:           "juan.caballo123@ejemplo.com",
-			Telefono:        "2494505050",
-			Rol:             "P",
-		})
+	//INTENTAMOS CREAR UNA RELACION MEDICO OBRA CON UNA OBRA SOCIAL QUE NO EXISTE
+	relacionCreada, err = queries.CrearRelacionMedicoObra(ctx, sqlc.CrearRelacionMedicoObraParams{
+		IDMedico:         usuarioCreado.ID,
+		ObraSocialNombre: "IOMA SQL",
+	})
 	if err != nil {
-		log.Fatalf("No se pudo actualizar el usuario: %v", err)
+		log.Fatalf("No se pudo crear la relación medico obra social: %v", err)
 	}
-	fmt.Printf("El usuario se actualizó correctamente \n")
+	fmt.Printf("Relacion creada: %+v\n", relacionCreada)
 
-	//VEMOS TODOS LOS USUARIOS QUE TENEMOS CREADOS
-	usuarios, err := queries.ListarUsuarios(ctx)
+	//VEMOS LAS OBRAS SOCIALES POR MEDICO
+	obrasSociales, err := queries.ListarObrasPorMedico(ctx, usuarioCreado.ID)
 	if err != nil {
-		log.Fatalf("No se pueden listar los usuarios: %v", err)
+		log.Fatalf("No se pueden listar las obras sociales: %v", err)
 	}
-	fmt.Printf("Todos los usuarios: %+v\n", usuarios)
+	fmt.Printf("Las obras sociales por las que atiende el medico son: %+v\n", obrasSociales)
 
-	//BORRAMOS UN USUARIO QUE ES PACIENTE
-	err = queries.EliminarUsuario(ctx, 1)
-	if err != nil {
-		log.Fatalf("No se pudo borrar el usuario: %v", err)
-	}
-	fmt.Println("El usuario ID 1 se borró satisfactoriamente")
-
-	//VEMOS TODOS LOS MEDICOS
-	medicos, err := queries.ListarMedicos(ctx)
+	//VEMOS LOS MEDICOS POR OBRA SOCIAL
+	medicos, err := queries.ListarMedicosPorObra(ctx, "IOMA")
 	if err != nil {
 		log.Fatalf("No se pueden listar los medicos: %v", err)
 	}
-	fmt.Printf("Todos los medicos: %+v\n", medicos)
+	fmt.Printf("Los medicos que atiendes por esa obra social son: %+v\n", medicos)
 
-	//VEMOS TODOS LOS PACIENTES
-	pacientes, err := queries.ListarPacientes(ctx)
-	if err != nil {
-		log.Fatalf("No se pueden listar los pacientes: %v", err)
-	}
-	fmt.Printf("Todos los pacientes: %+v\n", pacientes)
-
-	//ELIMINAMOS MEDICO
-	err = queries.EliminarMedico(ctx, 2)
-	if err != nil {
-		log.Fatalf("No se pudo borrar el medico: %v", err)
-	}
-	fmt.Println("El medico ID 2 se borró satisfactoriamente")
-
-	//AHORA VEMOS QUE SE BORRO DE MEDICO, PERO NO DE USUARIOS
-	medicos, err = queries.ListarMedicos(ctx)
+	medicos, err = queries.ListarMedicosPorObra(ctx, "PAMI - INSSJP")
 	if err != nil {
 		log.Fatalf("No se pueden listar los medicos: %v", err)
 	}
-	fmt.Printf("Todos los medicos: %+v\n", medicos)
+	fmt.Printf("Los medicos que atiendes por esa obra social son: %+v\n", medicos)
 
-	usuarios, err = queries.ListarUsuarios(ctx)
+	//ELIMINAMOS RELACION MEDICO OBRA SOCIAL
+	filas, err := queries.EliminarRelacionMedicoObra(ctx, sqlc.EliminarRelacionMedicoObraParams{
+		IDMedico:         usuarioCreado.ID,
+		ObraSocialNombre: "IOMA",
+	})
 	if err != nil {
-		log.Fatalf("No se pueden listar los usuarios: %v", err)
+		log.Fatalf("No se pudo borrar la relación: %v", err)
 	}
-	fmt.Printf("Todos los usuarios: %+v\n", usuarios)
+	if filas == 0 {
+		log.Fatalf("No se encontró la relación especificada")
+	}
+	fmt.Println("La relación se borró satisfactoriamente")
+
+	filas, err = queries.EliminarRelacionMedicoObra(ctx, sqlc.EliminarRelacionMedicoObraParams{
+		IDMedico:         usuarioCreado.ID,
+		ObraSocialNombre: "PAMI",
+	})
+	if err != nil {
+		log.Fatalf("No se pudo borrar la relación: %v", err)
+	}
+	if filas == 0 {
+		log.Fatalf("No se encontró la relación especificada")
+	}
+	fmt.Println("La relación se borró satisfactoriamente")
 }
 
 // func serveIndex(w http.ResponseWriter, r *http.Request) {

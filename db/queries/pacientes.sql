@@ -18,6 +18,6 @@ UPDATE pacientes
 SET obra_social = $2, nro_afiliado = $3
 WHERE id_paciente = $1;
 
--- name: EliminarPaciente :exec
+-- name: EliminarPaciente :execrows
 DELETE FROM pacientes
 WHERE id_paciente = $1;
