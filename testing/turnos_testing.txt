@@ -1,0 +1,108 @@
+//CREAMOS UN PACIENTE Y UN MEDICO
+	usuarioParaPaciente, err := queries.CrearUsuario(ctx,
+		sqlc.CrearUsuarioParams{
+			Dni:             "12345678",
+			Nombre:          "Juan",
+			Apellido:        "Caballo",
+			Sexo:            "Masculino",
+			FechaNacimiento: time.Date(2000, 5, 20, 0, 0, 0, 0, time.UTC),
+			Email:           "juan.caballo@ejemplo.com",
+			Telefono:        "2494505050",
+			Rol:             "P",
+		})
+
+	if err != nil {
+		log.Fatalf("No se pudo crear el usuario: %v", err)
+	}
+	fmt.Printf("Usuario creado: %+v\n", usuarioParaPaciente)
+
+	pacienteCreado, err := queries.CrearPaciente(ctx,
+		sqlc.CrearPacienteParams{
+			IDPaciente: usuarioParaPaciente.ID,
+		})
+	if err != nil {
+		log.Fatalf("No se pudo crear el paciente: %v", err)
+	}
+	fmt.Printf("Paciente creado: %+v\n", pacienteCreado)
+
+	//OTRO USUARIO
+	usuarioParaMedico, err := queries.CrearUsuario(ctx,
+		sqlc.CrearUsuarioParams{
+			Dni:             "12345678",
+			Nombre:          "Juana",
+			Apellido:        "Maria",
+			Sexo:            "Femenino",
+			FechaNacimiento: time.Date(1997, 6, 30, 0, 0, 0, 0, time.UTC),
+			Email:           "juanita.maria@ejemplo.com",
+			Telefono:        "2494505045",
+			Rol:             "M",
+		})
+	if err != nil {
+		log.Fatalf("No se pudo crear el usuario: %v", err)
+	}
+	fmt.Printf("Usuario creado: %+v\n", usuarioParaMedico)
+
+	//LO GUARDAMOS COMO MEDICO
+	medicoCreado, err := queries.CrearMedico(ctx,
+		sqlc.CrearMedicoParams{
+			IDMedico:     usuarioParaMedico.ID,
+			NroMatricula: 120,
+			Especialidad: "Radiología",
+		})
+	if err != nil {
+		log.Fatalf("No se pudo crear el medico: %v", err)
+	}
+	fmt.Printf("Medico creado: %+v\n", medicoCreado)
+
+	//CREO UN TURNO
+	turnoCreado, err := queries.CrearTurno(ctx, sqlc.CrearTurnoParams{
+		IDMedico:   usuarioParaMedico.ID,
+		IDPaciente: usuarioParaPaciente.ID,
+		Fecha:      time.Date(2025, 10, 31, 0, 0, 0, 0, time.UTC),
+		Hora:       time.Date(0, 0, 0, 10, 25, 0, 0, time.UTC),
+	})
+	if err != nil {
+		log.Fatalf("No se pudo crear el turno: %v", err)
+	}
+	fmt.Printf("Turno creado: %+v\n", usuarioParaMedico)
+
+	//OBTENGO EL TURNO
+	turno, err := queries.ObtenerTurnoPorId(ctx, turnoCreado.IDTurno)
+	if err != nil {
+		log.Fatalf("No se pudo obtener el turno: %v", err)
+	}
+	fmt.Printf("Turno: %+v\n", turno)
+
+	//TURNOS POR PACIENTE
+	turnos, err := queries.ObtenerListaTurnosDePaciente(ctx, usuarioParaPaciente.ID)
+	if err != nil {
+		log.Fatalf("No se pudo obtener el turno: %v", err)
+	}
+	fmt.Printf("Turno: %+v\n", turnos)
+
+	//TURNOS POR MEDICO
+	turnos, err = queries.ObtenerListaTurnosPorMedico(ctx, usuarioParaMedico.ID)
+	if err != nil {
+		log.Fatalf("No se pudo obtener el turno: %v", err)
+	}
+	fmt.Printf("Turno: %+v\n", turnos)
+
+	//CANCELAR TURNO
+	err = queries.CancelarTurno(ctx, turno.IDTurno)
+
+	//OBTENEMOS EL TURNO
+	turno, err = queries.ObtenerTurnoPorId(ctx, turnoCreado.IDTurno)
+	if err != nil {
+		log.Fatalf("No se pudo obtener el turno: %v", err)
+	}
+	fmt.Printf("Turno: %+v\n", turno)
+
+	//ATENDER TURNO
+	err = queries.AtenderTurno(ctx, turno.IDTurno)
+
+	//OBTENEMOS EL TURNO
+	turno, err = queries.ObtenerTurnoPorId(ctx, turnoCreado.IDTurno)
+	if err != nil {
+		log.Fatalf("No se pudo obtener el turno: %v", err)
+	}
+	fmt.Printf("Turno: %+v\n", turno)

@@ -1,0 +1,18 @@
+//CREAR OBRA SOCIAL
+obra_social_creada, err := queries.CrearObraSocial(ctx, "AVALIAN")
+if err != nil {
+    log.Fatalf("Error al crear la obra social:  %v", err)
+} else {
+    fmt.Printf("La obra social se creo correctamente %v\n", obra_social_creada)
+}
+
+//ELIMINAR OBRA SOCIAL
+filas, err := queries.EliminarObraSocial(ctx, "AVALIAN")
+if err != nil {
+    log.Fatalf("No se pudo borrar la obra social: %v", err)
+}
+if filas == 0 {
+    log.Fatalf("No se encontró la obra social")
+} else {
+    fmt.Println("La obra social se eliminó satisfactoriamente")
+}
