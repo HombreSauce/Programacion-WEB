@@ -78,7 +78,8 @@ ALTER TABLE medicos ADD CONSTRAINT medicos_usuarios_FK
 -- Reference: pacientes_obra_social (table: pacientes)
 ALTER TABLE pacientes ADD CONSTRAINT pacientes_obra_social_FK
     FOREIGN KEY (obra_social)
-    REFERENCES obra_social (nombre)  
+    REFERENCES obra_social (nombre)
+    ON DELETE SET NULL
 ;
 
 -- Reference: pacientes_usuarios (table: pacientes)
@@ -89,13 +90,13 @@ ALTER TABLE pacientes ADD CONSTRAINT pacientes_usuarios_FK
 ;
 
 -- Reference: turnos_medicos (table: turnos)
-ALTER TABLE turnos ADD CONSTRAINT turnos_medicos
+ALTER TABLE turnos ADD CONSTRAINT turnos_medicos_FK
     FOREIGN KEY (id_medico)
     REFERENCES medicos (id_medico)  
 ;
 
 -- Reference: turnos_pacientes (table: turnos)
-ALTER TABLE turnos ADD CONSTRAINT turnos_pacientes
+ALTER TABLE turnos ADD CONSTRAINT turnos_pacientes_FK
     FOREIGN KEY (id_paciente)
     REFERENCES pacientes (id_paciente)  
 ;

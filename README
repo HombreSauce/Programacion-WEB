@@ -1,13 +1,18 @@
 # Estructura
-- "main.go": Código fuente del servidor en Go.
-- "static/index.html": Página principal servida al entrar en `http://localhost:8080/`.
+- db: Lógica de la base de datos
+  - queries: Consultas SQL (usadas por sqlc)
+  - schema: Definición del esquema de la base de datos.
+  - sqlc: Código Go generado por sqlc.
+- "main.go": Entrada de la aplicación.
+- "docker-compose.yaml": Configuración de PostgreSQL en contenedor
+- "sqlc.yaml": Configuración de sqlc
 
 # Requisitos
 - Go 1.20+
+- sqlc
+- Docker
 
 # Ejecución
-- Moverse desde la terminal a la carpeta contenedora del archivo main.go.
-- Compilar y ejecutar el proyecto con el comando "go run main.go"
-- Abrir en el navegador http://localhost:8080
-
-- correr:  docker exec -i some-postgres psql -U postgres -d base_turnero < ./db/schema/schema.sql
+- Moverse desde la terminal a la carpeta contenedora del archivo Makefile
+- Ejecutar en terminal "make run" esto levantará el docker compose, generará el sqlc y correrá el archivo main.go una vez que 
+  se pueda conectar a la base de datos.
